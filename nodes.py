@@ -7,7 +7,7 @@ from csvfiles import CSV_PATH, NODES_CSV
 node_fields = ("ID", "Charger Node Name", "Charger Node Address",
                "Charger Node Type", "Charger Node Status", "Power Line",
                "Record Status")
-node_fields_to_show = 0, 1, 2, 3, 4, 5
+node_fields_to_show = range(6)
 
 
 def get_nodes_header():
@@ -93,6 +93,32 @@ class Node:
     def record_status(self, record_status):
         self.__record_status = record_status
 
+    def __eq__(self, other):
+        return self.__id == other.id \
+               and self.__name == other.name \
+               and self.__address == other.address \
+               and self.__node_access == other.node_type \
+               and self.__status == other.status \
+               and self.__power_line == other.power_line \
+               and self.__record_status == other.record_status
+
+    def __str__(self):
+        txt_power_line = 'None'
+        if self.__power_line is not None:
+            txt_power_line = self.__power_line.name
+        field_0 = node_fields[0] + '# ' + str(self.__id)
+        field_1 = node_fields[1] + ' -> \'' + self.__name + '\''
+        field_2 = node_fields[2] + ' -> \'' + self.__address + '\''
+        field_3 = '\n' + '\t' * 2 + node_fields[3] + ' -> '\
+                  + node_access_types[self.__node_access]
+        field_4 = ' ' + node_fields[4] + ' -> ' + node_statuses[self.__status]
+        field_5 = node_fields[5] + ' ID# ' + ' -> ' + str(self.__power_line_id)
+        field_5_link = node_fields[5] + ' -> \'' + txt_power_line + '\''
+        field_6 = '\n' + '\t' * 2 + node_fields[6] + ' -> '\
+                  + str(self.__record_status)
+        return ",\t".join([field_0, field_1, field_2, field_3, field_4,
+                           field_5, field_5_link, field_6])
+
     def get_node_to_show_in_table(self):
         to_show = list()
         to_show.append(self.__id)
@@ -111,37 +137,11 @@ class Node:
                 to_show.append(str(self.__power_line_id))
         return to_show
 
-    def __eq__(self, other):
-        return self.__id == other.id \
-               and self.__name == other.name \
-               and self.__address == other.address \
-               and self.__node_access == other.node_type \
-               and self.__status == other.status \
-               and self.__power_line == other.power_line \
-               and self.__record_status == other.record_status
-
-    def __str__(self):
-        txt_power_line = 'None'
-        if self.__power_line is not None:
-            txt_power_line = self.__power_line.name
-        field_0 = node_fields[0] + '# ' + str(self.__id)
-        field_1 = node_fields[1] + ' -> ' + self.__name
-        field_2 = node_fields[2] + ' -> ' + self.__address
-        field_3 = '\n' + '\t' * 2 + node_fields[3] + ' -> '\
-                  + node_access_types[self.__node_access]
-        field_4 = ' ' + node_fields[4] + ' -> ' + node_statuses[self.__status]
-        field_5 = node_fields[5] + ' ID# ' + ' -> ' + str(self.__power_line_id)
-        field_5_link = node_fields[5] + ' -> ' + txt_power_line
-        field_6 = '\n' + '\t' * 2 + node_fields[6] + ' -> '\
-                  + str(self.__record_status)
-        return ",\t".join([field_0, field_1, field_2, field_3, field_4,
-                           field_5, field_5_link, field_6])
-
 
 class Nodes:
 
-    def __init__(self, power_line_connected=None, path=CSV_PATH + NODES_CSV):
-        self.__nodes = self.__read_csv(power_line_connected, path)
+    def __init__(self, power_lines_connected=None, path=CSV_PATH + NODES_CSV):
+        self.__nodes = self.__read_csv(power_lines_connected, path)
 
     @property
     def nodes(self):
@@ -150,17 +150,6 @@ class Nodes:
     @nodes.setter
     def nodes(self, node_list):
         self.__nodes = node_list
-
-    def get_all_to_show_in_table(self):
-        res = list()
-        num = 0
-        for line in self.__nodes:
-            line_text = line.get_node_to_show_in_table()
-            if line.record_status:
-                num += 1
-                line_text[0] = str(num)
-                res.append(line_text)
-        return res
 
     def __eq__(self, other):
         res = len(self.__nodes) == len(other.nodes)
@@ -174,6 +163,12 @@ class Nodes:
         for node in self.__nodes:
             nodes_str += '\n' + node.__str__()
         return nodes_str
+
+    def __getitem__(self, item):
+        if item < len(self.__nodes):
+            return self.__nodes[item]
+        else:
+            return None
 
     @staticmethod
     def __read_csv(power_lines_connected, path):
@@ -222,15 +217,19 @@ class Nodes:
                                 index = new_node.power_line_id - 1
                                 new_node.power_line\
                                     = power_lines_connected[index]
-                        elif column_count == 6:         # Power Line
+                        elif column_count == 6:         # Record Status
                             new_node.record_status = column.upper() == 'ON'
                             read_nodes.append(new_node)
                     column_count += 1
                 row_count += 1
         return read_nodes
 
-    def save(self, path=CSV_PATH + "Test1\\" + NODES_CSV):
-        self.__write_csv(path)
+    def save(self, path=''):
+        if path == '':
+            path_to_save = path
+        else:
+            path_to_save = path + '\\'
+        self.__write_csv(CSV_PATH + path_to_save + NODES_CSV)
 
     def __write_csv(self, path):
         with open(path, mode='w') as write_file:
@@ -249,17 +248,28 @@ class Nodes:
                                     str(node.power_line_id),
                                     record_status_text])
 
+    def get_all_to_show_in_table(self):
+        res = list()
+        num = 0
+        for line in self.__nodes:
+            line_text = line.get_node_to_show_in_table()
+            if line.record_status:
+                num += 1
+                line_text[0] = str(num)
+                res.append(line_text)
+        return res
+
 
 if __name__ == "__main__":
     power_lines = powerlines.PowerLines()
     nodes = Nodes(power_lines)
     print(nodes)
-    power_lines_test = powerlines.PowerLines(CSV_PATH + "Test\\"
-                                             + "PowerLines.csv")
+    power_lines_test\
+        = powerlines.PowerLines(CSV_PATH + "Test\\" + "PowerLines.csv")
     nodes_test = Nodes(power_lines_test, CSV_PATH + "Test\\" + NODES_CSV)
     print(nodes_test)
     print(nodes == nodes_test)
-    nodes_test.save()
+    nodes_test.save("Test1")
     nodes_test1 = Nodes(power_lines_test, CSV_PATH + "Test1\\" + NODES_CSV)
     print(nodes_test1)
     print(nodes_test == nodes_test1)

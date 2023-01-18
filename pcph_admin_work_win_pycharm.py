@@ -8,6 +8,7 @@ import csv
 import csvfiles
 from powerlines import PowerLines, get_power_lines_header
 from nodes import Nodes, get_nodes_header
+from users import Users, get_users_header
 
 import os
 
@@ -228,6 +229,8 @@ if __name__ == "__main__":
     print(power_lines)
     nodes = Nodes(power_lines)
     print(nodes)
+    users = Users(nodes)
+    print(users)
 
     root = tk.Tk()
     # root.geometry('1280x720+275+225')
@@ -249,16 +252,13 @@ if __name__ == "__main__":
 
     font_header = tk_font.Font(family='Helvetica', size=24, weight='bold')
     font_config_header = tk_font.Font(family='Helvetica', size=20)
-    font_config_button = tk_font.Font(family='Helvetica',
-                                      size=12,
-                                      weight='bold')
 
     # noinspection SpellCheckingInspection
     label_header = tk.Label(frame_label,
                             text="Grizzl-E Power Hub Administration Tool",
                             font=font_header,
                             foreground='red',
-                            background='cyan',
+                            background='light cyan',
                             pady=4,
                             relief='solid')
     label_header.pack(expand=True, fill='both')
@@ -269,7 +269,7 @@ if __name__ == "__main__":
                                  text="Power Lines",
                                  font=font_control,
                                  foreground='blue',
-                                 background='light green',
+                                 background='#D8FFD8',
                                  command=to_power_lines_frame)
     button_powerline.pack(expand=True, fill='both')
     button_powerline.configure(relief='sunken')
@@ -278,7 +278,7 @@ if __name__ == "__main__":
                              text='Nodes',
                              font=font_control,
                              foreground='blue',
-                             background='#90EE90',
+                             background='lavender',
                              command=to_nodes_frame)
     button_nodes.pack(expand=True, fill='both')
 
@@ -286,7 +286,7 @@ if __name__ == "__main__":
                                  text="Customers",
                                  font=font_control,
                                  foreground='blue',
-                                 background='#90EE90',
+                                 background='#FFD8D8',
                                  command=to_customers_frame)
     button_customers.pack(expand=True, fill='both')
 
@@ -294,15 +294,15 @@ if __name__ == "__main__":
                                  text="Schedules",
                                  font=font_control,
                                  foreground='blue',
-                                 background='#90EE90',
+                                 background='#FFFFD8',
                                  command=to_schedules_frame)
     button_schedules.pack(expand=True, fill='both')
 
     button_reports = tk.Button(frame_control,
-                               text="Reports",
+                               text="Transactions",
                                font=font_control,
                                foreground='blue',
-                               background='#90EE90',
+                               background='#FFD8FF',
                                command=to_reports_frame)
     button_reports.pack(expand=True, fill='both')
 
@@ -310,28 +310,31 @@ if __name__ == "__main__":
                              text="Owner Details",
                              font=font_control,
                              foreground='blue',
-                             background='#90EE90',
+                             background='light cyan',
                              command=to_owner_frame)
     button_owner.pack(expand=True, fill='both')
+
+    font_config_button\
+        = tk_font.Font(family='Helvetica', size=12, weight='bold')
 
     frame_power_lines = tk.Frame(frame_config)
     frame_power_lines.pack(expand=True, fill='both', padx=12, pady=12)
     control_frame_num = 1
 
     frame_header_power_lines = tk.Frame(frame_power_lines,
-                                        background='light green',
+                                        background='#D8FFD8',
                                         relief='solid', border=1)
     frame_header_power_lines.pack(expand=False, fill='both', side='top')
 
     label_power_lines = tk.Label(frame_header_power_lines,
-                                 background='light green',
+                                 background='#D8FFD8',
                                  text='Power Lines',
                                  font=font_config_header)
     label_power_lines.pack()
 
     frame_footer_power_lines = tk.Frame(frame_power_lines,
                                         pady=18,
-                                        background='light green',
+                                        background='#D8FFD8',
                                         relief='solid', border=1)
     frame_footer_power_lines.pack(expand=False, fill='both', side='bottom')
 
@@ -387,19 +390,19 @@ if __name__ == "__main__":
     frame_nodes = tk.Frame(frame_config)
 
     frame_header_nodes = tk.Frame(frame_nodes,
-                                  background='light green',
+                                  background='lavender',
                                   relief='solid', border=1)
     frame_header_nodes.pack(expand=False, fill='both', side='top')
 
     label_nodes = tk.Label(frame_header_nodes,
-                           background='light green',
+                           background='lavender',
                            text='Nodes (Charge Points)',
                            font=font_config_header)
     label_nodes.pack()
 
     frame_footer_nodes = tk.Frame(frame_nodes,
                                   pady=18,
-                                  background='light green',
+                                  background='lavender',
                                   relief='solid',
                                   border=1)
     frame_footer_nodes.pack(expand=False, fill='both', side='bottom')
@@ -439,20 +442,26 @@ if __name__ == "__main__":
                                show="headings")
     nodes_table.pack(fill='both', expand=True)
 
+    nodes_scrollbar = ttk.Scrollbar(nodes_table,
+                                    orient='vertical',
+                                    command=nodes_table.yview)
+    nodes_table.configure(yscroll=nodes_scrollbar.set)
+    nodes_scrollbar.pack(fill='y', side='right')
+
     nodes_table.heading(node_columns[0], text='#', anchor='c')
     nodes_table.heading(node_columns[1], text='ID#', anchor='c')
     nodes_table.heading(node_columns[2], text='Node Name', anchor='c')
     nodes_table.heading(node_columns[3], text='Address', anchor='c')
     nodes_table.heading(node_columns[4], text='Type', anchor='c')
     nodes_table.heading(node_columns[5], text='Status', anchor='c')
-    nodes_table.heading(node_columns[6], text='Power Line ID#', anchor='c')
+    nodes_table.heading(node_columns[6], text='Power Line ID#', anchor='w')
 
     nodes_table.column('#1', stretch='no', width=20, anchor='c')
     nodes_table.column('#2', stretch='no', width=30, anchor='c')
-    nodes_table.column('#3', width=55, anchor='c')
-    nodes_table.column('#5', stretch='no', width=55)
-    nodes_table.column('#6', stretch='no', width=55)
-    nodes_table.column('#7', stretch='no', width=80, anchor='c')
+    nodes_table.column('#3', width=55, minwidth=40, anchor='c')
+    nodes_table.column('#5', stretch='no', width=55, anchor='c')
+    nodes_table.column('#6', stretch='no', width=55, anchor='c')
+    nodes_table.column('#7', stretch='no', width=100, anchor='c')
 
     all_nodes = nodes.get_all_to_show_in_table()
     for node in all_nodes:
@@ -461,20 +470,20 @@ if __name__ == "__main__":
     frame_customers = tk.Frame(frame_config)
 
     frame_header_customers = tk.Frame(frame_customers,
-                                      background='light green',
+                                      background='#FFD8D8',
                                       relief='solid',
                                       border=1)
     frame_header_customers.pack(expand=False, fill='both', side='top')
 
     label_customers = tk.Label(frame_header_customers,
-                               background='light green',
+                               background='#FFD8D8',
                                text='Customers',
                                font=font_config_header)
     label_customers.pack()
 
     frame_footer_customers = tk.Frame(frame_customers,
                                       pady=18,
-                                      background='light green',
+                                      background='#FFD8D8',
                                       relief='solid',
                                       border=1)
     frame_footer_customers.pack(expand=False, fill='both', side='bottom')
@@ -500,23 +509,74 @@ if __name__ == "__main__":
                                     text='Delete')
     button_nodes_delete.pack(side='right', expand=True)
 
+    users_columns = get_users_header()
+
+    users_table = ttk.Treeview(frame_customers,
+                               columns=users_columns,
+                               show="headings")
+    users_table.pack(fill='both', expand=True)
+
+    users_vertical_scrollbar = ttk.Scrollbar(users_table,
+                                             orient='vertical',
+                                             command=users_table.yview)
+    users_table.configure(yscroll=users_vertical_scrollbar.set)
+    users_vertical_scrollbar.pack(fill='y', side='right')
+
+    users_horizontal_scrollbar = ttk.Scrollbar(users_table,
+                                               orient='horizontal',
+                                               command=users_table.xview)
+    users_table.configure(xscroll=users_horizontal_scrollbar.set)
+    users_horizontal_scrollbar.pack(fill='x', side='bottom')
+
+    users_table.heading(users_columns[0], text='#')
+    users_table.heading(users_columns[1], text='ID#')
+    users_table.heading(users_columns[2], text='First Name')
+    users_table.heading(users_columns[3], text='Second Name')
+    users_table.heading(users_columns[4], text='Address')
+    users_table.heading(users_columns[5], text='Phone')
+    users_table.heading(users_columns[6], text='Email')
+    users_table.heading(users_columns[7], text='User Name')
+    users_table.heading(users_columns[8], text='Temp Pass')
+    users_table.heading(users_columns[9], text='PIN')
+    users_table.heading(users_columns[10], text='Active')
+    users_table.heading(users_columns[11], text='Parking Slot')
+    users_table.heading(users_columns[12], text='Node ID', anchor='w')
+
+    users_table.column('#1', stretch='no', width=20, anchor='c')
+    users_table.column('#2', stretch='no', width=30, anchor='c')
+    users_table.column('#3', width=65, minwidth=65)
+    users_table.column('#4', width=85, minwidth=85)
+    users_table.column('#5', minwidth=205)
+    users_table.column('#6', width=85, minwidth=85)
+    users_table.column('#7', width=165, minwidth=125)
+    users_table.column('#8', width=95, minwidth=75, anchor='c')
+    users_table.column('#9', width=85, minwidth=65, anchor='c')
+    users_table.column('#10', width=55, minwidth=45, anchor='c')
+    users_table.column('#11', stretch='no', width=45, anchor='c')
+    users_table.column('#12', width=75, minwidth=47, anchor='c')
+    users_table.column('#13', stretch='no', width=65, anchor='c')
+
+    all_users = users.get_all_to_show_in_table()
+    for user in all_users:
+        users_table.insert('', 'end', values=user)
+
     frame_schedules = tk.Frame(frame_config)
 
     frame_header_schedules = tk.Frame(frame_schedules,
-                                      background='light green',
+                                      background='#FFFFD8',
                                       relief='solid',
                                       border=1)
     frame_header_schedules.pack(expand=False, fill='both', side='top')
 
     label_schedules = tk.Label(frame_header_schedules,
-                               background='light green',
+                               background='#FFFFD8',
                                text='Schedules',
                                font=font_config_header)
     label_schedules.pack()
 
     frame_footer_schedules = tk.Frame(frame_schedules,
                                       pady=18,
-                                      background='light green',
+                                      background='#FFFFD8',
                                       relief='solid',
                                       border=1)
     frame_footer_schedules.pack(expand=False, fill='both', side='bottom')
@@ -531,20 +591,20 @@ if __name__ == "__main__":
     frame_reports = tk.Frame(frame_config)
 
     frame_header_reports = tk.Frame(frame_reports,
-                                    background='light green',
+                                    background='#FFD8FF',
                                     relief='solid',
                                     border=1)
     frame_header_reports.pack(expand=False, fill='both', side='top')
 
     label_reports = tk.Label(frame_header_reports,
-                             background='light green',
-                             text='Reports',
+                             background='#FFD8FF',
+                             text="Transactions and Reports",
                              font=font_config_header)
     label_reports.pack()
 
     frame_footer_reports = tk.Frame(frame_reports,
                                     pady=18,
-                                    background='light green',
+                                    background='#FFD8FF',
                                     relief='solid',
                                     border=1)
     frame_footer_reports.pack(expand=False, fill='both', side='bottom')
@@ -559,20 +619,20 @@ if __name__ == "__main__":
     frame_owner = tk.Frame(frame_config)
 
     frame_header_owner = tk.Frame(frame_owner,
-                                  background='light green',
+                                  background='light cyan',
                                   relief='solid',
                                   border=1)
     frame_header_owner.pack(expand=False, fill='both', side='top')
 
     label_owner = tk.Label(frame_header_owner,
-                           background='light green',
+                           background='light cyan',
                            text='Owner Details',
                            font=font_config_header)
     label_owner.pack()
 
     frame_footer_owner = tk.Frame(frame_owner,
                                   pady=18,
-                                  background='light green',
+                                  background='light cyan',
                                   relief='solid',
                                   border=1)
     frame_footer_owner.pack(expand=False, fill='both', side='bottom')

@@ -4,7 +4,7 @@ import csv
 from csvfiles import CSV_PATH, POWER_LINES_CSV
 
 power_line_fields = "ID", "Line Name", "Max AMP", "Active", "Record Status"
-power_line_fields_to_show = 0, 1, 2, 3
+power_line_fields_to_show = range(4)
 
 
 def get_power_lines_header():
@@ -60,6 +60,21 @@ class PowerLine:
     def record_status(self, record_status):
         self.__record_status = record_status
 
+    def __eq__(self, other):
+        return self.__id == other.id and self.__name == other.name \
+                            and self.__max_amp == other.max_amp \
+                            and self.__active == other.active \
+                            and self.__record_status == other.record_status
+
+    def __str__(self):
+        field_0 = power_line_fields[0] + '# ' + str(self.__id)
+        field_1 = power_line_fields[1] + ' -> \'' + self.__name + '\''
+        field_2 = '\n' + '\t' * 2 + power_line_fields[2] + ' -> '\
+                  + str(self.__max_amp)
+        field_3 = power_line_fields[3] + ' ->  ' + str(self.__active)
+        field_4 = power_line_fields[4] + ' -> ' + str(self.__record_status)
+        return ",\t".join([field_0, field_1, field_2, field_3, field_4])
+
     def get_line_to_show_in_table(self):
         to_show = list()
         to_show.append(self.__id)
@@ -72,25 +87,10 @@ class PowerLine:
                 to_show.append(str(self.__max_amp))
             if column_num == 3:
                 if self.__active:
-                    to_show.append('Yes')
+                    to_show.append("Yes")
                 else:
-                    to_show.append('No')
+                    to_show.append("No")
         return to_show
-
-    def __eq__(self, other):
-        return self.__id == other.id and self.__name == other.name \
-                            and self.__max_amp == other.max_amp \
-                            and self.__active == other.active \
-                            and self.__record_status == other.record_status
-
-    def __str__(self):
-        field_0 = power_line_fields[0] + '# ' + str(self.__id)
-        field_1 = power_line_fields[1] + ' -> ' + self.__name
-        field_2 = '\n' + '\t' * 2 + power_line_fields[2] + ' -> '\
-                  + str(self.__max_amp)
-        field_3 = power_line_fields[3] + ' ->  ' + str(self.__active)
-        field_4 = power_line_fields[4] + ' -> ' + str(self.__record_status)
-        return ",\t".join([field_0, field_1, field_2, field_3, field_4])
 
 
 class PowerLines:
@@ -105,17 +105,6 @@ class PowerLines:
     @lines.setter
     def lines(self, lines):
         self.__lines = lines
-
-    def get_all_to_show_in_table(self):
-        res = list()
-        num = 0
-        for line in self.__lines:
-            line_text = line.get_line_to_show_in_table()
-            if line.record_status:
-                num += 1
-                line_text[0] = str(num)
-                res.append(line_text)
-        return res
 
     def __eq__(self, other):
         if len(self.__lines) != len(other.__lines):
@@ -132,7 +121,10 @@ class PowerLines:
         return power_lines_str
 
     def __getitem__(self, item):
-        return self.__lines[item]
+        if item < len(self.__lines):
+            return self.__lines[item]
+        else:
+            return None
 
     def __iter__(self):
         return PowerLinesIterator(self)
@@ -192,6 +184,17 @@ class PowerLines:
                                      str(line.max_amp),
                                      str_active,
                                      str_record_status])
+
+    def get_all_to_show_in_table(self):
+        res = list()
+        num = 0
+        for line in self.__lines:
+            line_text = line.get_line_to_show_in_table()
+            if line.record_status:
+                num += 1
+                line_text[0] = str(num)
+                res.append(line_text)
+        return res
 
 
 class PowerLinesIterator:
