@@ -1,4 +1,5 @@
-Log ID	Time Created	Hub Serial Num										
-												
-												
-Transaction #	Sub Transaction #	PIN	User ID	Node Name	Node ID	Start	Finish	Amp Average	Power Average	Power total	Price	Cost
+Log ID	Timestamp	Time Created	Hub Serial Num	Hub ID												
+1		2023-Jan-18		1												
+																
+Transaction #	Sub Transaction #	PIN	User ID	Node Name	Node ID	Start Timestamp	Finish Timestamp	Date	Time Start	Time Finish	Amp Average	Power Average	Power total	Price	Cost	Valid
+1	1	9333	3	3	3			2022-Jan-18	12.01:25	14.15:27	11	16.55	34.25	0.15	5.76	Yes
